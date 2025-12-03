@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: olap
+
+# Production values should be provided via environment variables or a secrets manager. The examples below are placeholders.
+app:
+  datasource:
+    url: ${APP_DATASOURCE_URL:jdbc:sqlserver://prod-db-host:1433;databaseName=OlapProdDb}
+    username: ${APP_DATASOURCE_USERNAME:prod_user}
+    password: ${APP_DATASOURCE_PASSWORD:prod_password}
+    driver-class-name: ${APP_DATASOURCE_DRIVER_CLASS_NAME:com.microsoft.sqlserver.jdbc.SQLServerDriver}
+    name: ${APP_DATASOURCE_NAME:cube_view_prod}
+  allowed-columns: ${APP_ALLOWED_COLUMNS:Region,Product,Sales,Quantity,Year}
+
+server:
+  port: 8080
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: olap
+
+app:
+  datasource:
+    url: jdbc:sqlserver://localhost:1433;databaseName=OlapTestDb
+    username: sa
+    password: test_password
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    name: cube_view_test
+  allowed-columns: Region,Product,Sales,Quantity,Year
+
+server:
+  port: 8081
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

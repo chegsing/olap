@@ -1,0 +1,85 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '4.0.0'
+	id 'io.spring.dependency-management' version '1.1.7'
+	id 'jacoco'
+}
+
+group = 'com.prueba'
+version = '0.0.1-SNAPSHOT'
+description = 'Demo project for Spring Boot'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	// springdoc for OpenAPI/Swagger UI (minimal and compatible with WebFlux)
+	implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.1.0'
+	// JDBC support for JdbcTemplate and DataSource
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+	// ensure autoconfigure classes (DataSourceProperties etc.) are available
+	implementation 'org.springframework.boot:spring-boot-autoconfigure'
+	// Microsoft SQL Server JDBC driver (JRE 21 variant)
+	implementation 'com.microsoft.sqlserver:mssql-jdbc:11.2.0.jre21'
+	compileOnly 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-webflux-test'
+	// Mockito for mocking
+	testImplementation 'org.mockito:mockito-core:5.5.0'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// Note: SQL Server JDBC driver is included above; adjust version if needed.
+}
+
+jacoco {
+	toolVersion = "0.8.10"
+}
+
+tasks.test {
+	useJUnitPlatform()
+	finalizedBy tasks.jacocoTestReport
+}
+
+tasks.jacocoTestReport {
+	dependsOn tasks.test
+	reports {
+		xml.required.set(true)
+		html.required.set(true)
+	}
+}
+
+// Enforce minimum coverage 90%
+tasks.register('jacocoTestCoverageVerification', org.gradle.testing.jacoco.tasks.JacocoCoverageVerification) {
+	dependsOn tasks.test
+	violationRules {
+		rule {
+			limit {
+				counter = 'LINE'
+				excludes = []
+				relationship = 'GREATER_THAN'
+				value = 0.90
+			}
+		}
+	}
+}
+
+tasks.check {
+	dependsOn tasks.named('jacocoTestCoverageVerification')
+}

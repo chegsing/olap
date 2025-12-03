@@ -1,0 +1,7 @@
+# Base application yml. Define el perfil por defecto (cambiar en producción mediante SPRING_PROFILES_ACTIVE)
+spring:
+  profiles:
+    active: dev
+
+# Perfil-specific files are loaded automatically: application-dev.yml, application-test.yml, etc.
+# Configure sensitive values via environment variables in production.
