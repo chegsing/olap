@@ -14,14 +14,14 @@ class OlapServiceEdgeTest {
 
     @Test
     void buildQuery_unauthorizedColumn_throws() {
-        OlapQueryPort fake = sql -> new AggregationResponse(List.of());
+        OlapQueryPort fake = (sql, params) -> new AggregationResponse(List.of());
         var service = new OlapService(fake, Set.of("Allowed"));
         Assertions.assertThrows(IllegalArgumentException.class, () -> service.buildQuery("NotAllowed", "Sales", null));
     }
 
     @Test
     void buildQuery_onlyMeasures_noGroupBy() {
-        OlapQueryPort fake = sql -> new AggregationResponse(List.of(new AggregationRow(Map.of("Sales", 10))));
+        OlapQueryPort fake = (sql, params) -> new AggregationResponse(List.of(new AggregationRow(Map.of("Sales", 10))));
         var service = new OlapService(fake, Set.of("Sales"));
         var sql = service.buildQuery(null, "Sales", null);
         Assertions.assertTrue(sql.contains("SUM(Sales) AS Sales"));
@@ -30,7 +30,7 @@ class OlapServiceEdgeTest {
 
     @Test
     void parseFilters_handlesEmptyAndMalformed() {
-        OlapQueryPort fake = sql -> new AggregationResponse(List.of());
+        OlapQueryPort fake = (sql, params) -> new AggregationResponse(List.of());
         var service = new OlapService(fake, Set.of());
         var q1 = service.buildQuery(null, null, null);
         Assertions.assertNotNull(q1);

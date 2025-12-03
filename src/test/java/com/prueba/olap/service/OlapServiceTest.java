@@ -16,7 +16,7 @@ class OlapServiceTest {
     @Test
     void buildQuery_happyPath_generatesExpectedSql() {
         var captured = new AtomicReference<String>();
-        OlapQueryPort fake = sql -> {
+        OlapQueryPort fake = (sql, params) -> {
             captured.set(sql);
             var row = new AggregationRow(Map.of("Region", "EMEA", "Sales", 1000));
             return new AggregationResponse(List.of(row));
@@ -38,7 +38,7 @@ class OlapServiceTest {
     @Test
     void buildQuery_emptyFilters_returnsGroupAndSelect() {
         var captured = new AtomicReference<String>();
-        OlapQueryPort fake = sql -> {
+        OlapQueryPort fake = (sql, params) -> {
             captured.set(sql);
             var row = new AggregationRow(Map.of("Product", "P1", "Quantity", 10));
             return new AggregationResponse(List.of(row));

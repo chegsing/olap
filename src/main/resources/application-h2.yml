@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: olap
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  sql:
+    init:
+      mode: always
+
+app:
+  datasource:
+    url: jdbc:h2:mem:olapdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+    name: vw_olap_cube
+  allowed-columns: Region,Product,Sales,Quantity,Year
+
+server:
+  port: 8080
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

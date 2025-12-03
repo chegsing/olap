@@ -5,10 +5,12 @@ spring:
 # Production values should be provided via environment variables or a secrets manager. The examples below are placeholders.
 app:
   datasource:
-    url: ${APP_DATASOURCE_URL:jdbc:sqlserver://prod-db-host:1433;databaseName=OlapProdDb}
-    username: ${APP_DATASOURCE_USERNAME:prod_user}
-    password: ${APP_DATASOURCE_PASSWORD:prod_password}
-    driver-class-name: ${APP_DATASOURCE_DRIVER_CLASS_NAME:com.microsoft.sqlserver.jdbc.SQLServerDriver}
+    mode: xmla
+    xmla:
+      endpoint: ${APP_DATASOURCE_XMLA_ENDPOINT:https://prod-xmla.example.com/xmla}
+      catalog: ${APP_DATASOURCE_XMLA_CATALOG:OlapProdCatalog}
+      username: ${APP_DATASOURCE_XMLA_USERNAME:prod_xmla_user}
+      password: ${APP_DATASOURCE_XMLA_PASSWORD:prod_xmla_password}
     name: ${APP_DATASOURCE_NAME:cube_view_prod}
   allowed-columns: ${APP_ALLOWED_COLUMNS:Region,Product,Sales,Quantity,Year}
 

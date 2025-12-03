@@ -5,42 +5,96 @@ import com.prueba.olap.port.OlapQueryPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import javax.sql.DataSource;
 
+/**
+ * Configuración de fuentes de datos y adaptadores OLAP.
+ * Implementa el patrón de configuración de Spring para inyección de dependencias.
+ */
 @Configuration
 public class DataSourceConfig {
 
-    @Bean
-    public DataSource olapDataSource(Environment env) {
-        String url = env.getProperty("app.datasource.url");
-        String username = env.getProperty("app.datasource.username");
-        String password = env.getProperty("app.datasource.password");
-        String driver = env.getProperty("app.datasource.driver-class-name");
+    private static final String DEFAULT_CUBE_VIEW = "vw_olap_cube";
+    private static final String URL_PROPERTY = "app.datasource.url";
+    private static final String USERNAME_PROPERTY = "app.datasource.username";
+    private static final String PASSWORD_PROPERTY = "app.datasource.password";
+    private static final String DRIVER_PROPERTY = "app.datasource.driver-class-name";
+    private static final String CUBE_VIEW_PROPERTY = "app.datasource.name";
 
-        var ds = new DriverManagerDataSource();
+    @Bean
+    public DataSource olapDataSource(Environment environment) {
+        validateEnvironment(environment);
+        
+        String url = getRequiredProperty(environment, URL_PROPERTY);
+        String username = getRequiredProperty(environment, USERNAME_PROPERTY);
+        String password = getRequiredProperty(environment, PASSWORD_PROPERTY);
+        String driver = environment.getProperty(DRIVER_PROPERTY);
+
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        
         if (driver != null && !driver.trim().isEmpty()) {
-            ds.setDriverClassName(driver);
+            dataSource.setDriverClassName(driver);
         }
-        ds.setUrl(url);
-        ds.setUsername(username);
-        ds.setPassword(password);
-        return ds;
+        
+        dataSource.setUrl(url);
+        dataSource.setUsername(username);
+        dataSource.setPassword(password);
+        
+        return dataSource;
     }
 
     @Bean
-    public JdbcTemplate jdbcTemplate(DataSource ds) {
-        return new JdbcTemplate(ds);
+    public NamedParameterJdbcTemplate namedParameterJdbcTemplate(DataSource dataSource) {
+        validateDataSource(dataSource);
+        return new NamedParameterJdbcTemplate(dataSource);
     }
 
     @Bean
-    public OlapQueryPort olapQueryPort(JdbcTemplate jdbcTemplate, Environment env) {
-        String cubeView = env.getProperty("app.datasource.name");
+    public OlapQueryPort olapQueryPort(NamedParameterJdbcTemplate jdbcTemplate, Environment environment) {
+        validateJdbcTemplate(jdbcTemplate);
+        validateEnvironment(environment);
+        
+        String cubeViewName = getCubeViewName(environment);
+        return new JdbcOlapAdapter(jdbcTemplate, cubeViewName);
+    }
+    
+    private void validateEnvironment(Environment environment) {
+        if (environment == null) {
+            throw new IllegalArgumentException("Environment no puede ser nulo");
+        }
+    }
+    
+    private void validateDataSource(DataSource dataSource) {
+        if (dataSource == null) {
+            throw new IllegalArgumentException("DataSource no puede ser nulo");
+        }
+    }
+    
+    private void validateJdbcTemplate(NamedParameterJdbcTemplate jdbcTemplate) {
+        if (jdbcTemplate == null) {
+            throw new IllegalArgumentException("JdbcTemplate no puede ser nulo");
+        }
+    }
+    
+    private String getRequiredProperty(Environment environment, String propertyName) {
+        String value = environment.getProperty(propertyName);
+        if (value == null) {
+            throw new IllegalArgumentException(
+                "Propiedad requerida no encontrada: " + propertyName);
+        }
+        return value;
+    }
+    
+    private String getCubeViewName(Environment environment) {
+        String cubeView = environment.getProperty(CUBE_VIEW_PROPERTY);
+        
         if (cubeView == null || cubeView.trim().isEmpty()) {
-            cubeView = "cube_view"; // fallback logical name
+            return DEFAULT_CUBE_VIEW;
         }
-        return new JdbcOlapAdapter(jdbcTemplate, cubeView);
+        
+        return cubeView.trim();
     }
 }

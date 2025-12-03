@@ -4,10 +4,12 @@ spring:
 
 app:
   datasource:
-    url: jdbc:sqlserver://stage-db-host:1433;databaseName=OlapStageDb
-    username: stage_user
-    password: stage_password
-    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    mode: xmla
+    xmla:
+      endpoint: https://stage-xmla.example.com/xmla
+      catalog: OlapStageCatalog
+      username: stage_xmla_user
+      password: stage_xmla_password
     name: cube_view_stage
   allowed-columns: Region,Product,Sales,Quantity,Year
 
